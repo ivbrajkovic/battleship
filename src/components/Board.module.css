@@ -1,0 +1,29 @@
+.board {
+  aspect-ratio: 1 / 1;
+  display: grid;
+  gap: 0;
+  grid-template-rows: repeat(var(--size, 10), 1fr);
+  grid-template-columns: repeat(var(--size, 10), 1fr);
+
+  border-bottom: 1px solid var(--mantine-color-gray-6);
+  border-left: 1px solid var(--mantine-color-gray-6);
+
+  & > button {
+    border-right: 1px solid var(--mantine-color-gray-6);
+    border-top: 1px solid var(--mantine-color-gray-6);
+  }
+}
+
+.tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 2rem;
+}
+
+.tile img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
