@@ -1,0 +1,14 @@
+.burger {
+  position: absolute;
+}
+
+.icon {
+  color: var(--mantine-primary-color-6);
+}
+
+.title {
+  flex: 1;
+  @mixin smaller-than $mantine-breakpoint-sm {
+    justify-content: center;
+  }
+}

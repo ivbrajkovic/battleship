@@ -7,7 +7,9 @@ type ShipTypes = {
   [key: string]: ShipType;
 };
 
-type ShipDetails = {
+export type ShipDetails = {
+  id: number;
+  type: string;
   hits: number;
   size: number;
   positions: Array<number>;
@@ -20,18 +22,135 @@ type BattleshipGameConfig = {
 };
 
 export class BattleshipGame {
-  private static instance: BattleshipGame;
-  private shipIdCounter: number = 1;
-  private boardSize: number;
+  private static _instance: BattleshipGame;
+  private _shipIdCounter: number = 1;
+  private _boardSize: number;
   private _board: number[];
-  private shipTypes: ShipTypes;
-  private shipMap: Map<number, ShipDetails>;
+  private _shipTypes: ShipTypes;
+  private _shipDetailsMap: Map<number, ShipDetails>;
+
+  onBoardChange: (board: number[]) => void = () => {};
+  onShipDetailsChange: (shipDetails: ShipDetails[]) => void = () => {};
+  onShipSunk: (shipId: number) => void = () => {};
+  onShipHit: (shipId: number) => void = () => {};
+  onAllShipsSunk: () => void = () => {};
 
   public static getInstance() {
-    if (!BattleshipGame.instance)
-      BattleshipGame.instance = new BattleshipGame();
-    return BattleshipGame.instance;
+    if (!BattleshipGame._instance)
+      BattleshipGame._instance = new BattleshipGame();
+    return BattleshipGame._instance;
   }
+
+  // Private Methods and Constructor (Singleton) --------------------------------
+
+  private constructor() {
+    this._boardSize = 10;
+    this._shipTypes = {};
+    this._board = Array(this._boardSize * this._boardSize).fill(0);
+    this._shipDetailsMap = new Map();
+    this.placeShips();
+  }
+
+  private placeShips() {
+    for (const ship in this._shipTypes) {
+      for (let i = 0; i < this._shipTypes[ship].count; i++) {
+        this.placeShip(ship);
+      }
+    }
+  }
+
+  private placeShip(ship: string) {
+    const size = this._shipTypes[ship].size;
+    const triedCoordinates: Set<string> = new Set();
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const horizontal = Math.random() >= 0.5;
+      const maxRow = horizontal ? this._boardSize : this._boardSize - size;
+      const maxCol = horizontal ? this._boardSize - size : this._boardSize;
+      const row = Math.floor(Math.random() * maxRow);
+      const col = Math.floor(Math.random() * maxCol);
+      const coordinateKey = `${row},${col},${horizontal}`;
+
+      if (
+        !triedCoordinates.has(coordinateKey) &&
+        this.canPlaceShip(row, col, size, horizontal)
+      ) {
+        const shipId = this._shipIdCounter++;
+        this.placeShipOnBoard(row, col, size, horizontal, shipId);
+        this.updateShipMap(row, col, horizontal, shipId, ship, size);
+        // placed = true;
+        break;
+      } else {
+        triedCoordinates.add(coordinateKey);
+
+        if (triedCoordinates.size === maxRow * maxCol * 2) {
+          throw new Error("Failed to find a valid position for the ship");
+        }
+      }
+    }
+  }
+
+  private canPlaceShip(
+    row: number,
+    col: number,
+    size: number,
+    horizontal: boolean,
+  ): boolean {
+    for (let i = 0; i < size; i++) {
+      const r = row + (horizontal ? 0 : i);
+      const c = col + (horizontal ? i : 0);
+      if (
+        r >= this._boardSize ||
+        c >= this._boardSize ||
+        this._board[r * this._boardSize + c] !== 0
+      ) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private placeShipOnBoard(
+    row: number,
+    col: number,
+    size: number,
+    horizontal: boolean,
+    shipId: number,
+  ) {
+    for (let i = 0; i < size; i++) {
+      const r = row + (horizontal ? 0 : i);
+      const c = col + (horizontal ? i : 0);
+      this._board[r * this._boardSize + c] = shipId;
+    }
+  }
+
+  private updateShipMap(
+    row: number,
+    col: number,
+    horizontal: boolean,
+    shipId: number,
+    type: string,
+    size: number,
+  ) {
+    const positions: Array<number> = [];
+    for (let i = 0; i < size; i++) {
+      const position = horizontal
+        ? row * this._boardSize + (col + i)
+        : (row + i) * this._boardSize + col;
+      positions.push(position);
+    }
+    this._shipDetailsMap.set(shipId, {
+      id: shipId,
+      hits: 0,
+      type,
+      size,
+      positions,
+      horizontal,
+    });
+  }
+
+  // Getters and Setters --------------------------------------------------------
 
   /**
    * Retrieves a copy of the current game board from the BattleshipGame instance.
@@ -54,136 +173,79 @@ export class BattleshipGame {
     return this._board.slice();
   }
 
-  private constructor() {
-    this.boardSize = 10;
-    this.shipTypes = {};
-    this._board = Array(this.boardSize * this.boardSize).fill(0);
-    this.shipMap = new Map();
-    this.placeShips();
+  /**
+   * Retrieves a copy of the current board size from the BattleshipGame instance.
+   */
+  get boardSize() {
+    return this._boardSize;
   }
+
+  /**
+   * Retrieves a copy of the current ship details from the BattleshipGame instance.
+   * This getter method is designed to prevent external mutation of the ship details,
+   */
+  get shipDetails() {
+    return Array.from(this._shipDetailsMap.values()).map((ship) => ({
+      ...ship,
+    }));
+  }
+
+  // Public Methods -------------------------------------------------------------
 
   public init(config: Partial<BattleshipGameConfig> = {}) {
-    this.boardSize = config.boardSize ?? this.boardSize;
-    this.shipTypes = config.shipTypes ?? this.shipTypes;
-    this._board = Array(this.boardSize * this.boardSize).fill(0);
-    this.shipMap = new Map();
-    this.shipIdCounter = 1;
+    this._boardSize = config.boardSize ?? this._boardSize;
+    this._shipTypes = config.shipTypes ?? this._shipTypes;
+    this._board = Array(this._boardSize * this._boardSize).fill(0);
+    this._shipDetailsMap = new Map();
+    this._shipIdCounter = 1;
     this.placeShips();
   }
 
-  private placeShips() {
-    for (const ship in this.shipTypes) {
-      for (let i = 0; i < this.shipTypes[ship].count; i++) {
-        this.placeShip(this.shipTypes[ship].size);
-      }
-    }
-  }
+  public reset = () => {
+    this.init();
+    this.onBoardChange(this.board);
+    this.onShipDetailsChange(this.shipDetails);
+  };
 
-  private placeShip(size: number) {
-    const triedCoordinates: Set<string> = new Set();
-    let placed = false;
+  public attack = (index: number) => {
+    if (index < 0 || index >= this._board.length) return;
+    if (this._board[index] === -1 || this._board[index] === -2) return;
 
-    while (!placed) {
-      const horizontal = Math.random() >= 0.5;
-      const maxRow = horizontal ? this.boardSize : this.boardSize - size;
-      const maxCol = horizontal ? this.boardSize - size : this.boardSize;
-      const row = Math.floor(Math.random() * maxRow);
-      const col = Math.floor(Math.random() * maxCol);
-      const coordinateKey = `${row},${col},${horizontal}`;
-
-      if (
-        !triedCoordinates.has(coordinateKey) &&
-        this.canPlaceShip(row, col, size, horizontal)
-      ) {
-        const shipId = this.shipIdCounter++;
-        this.placeShipOnBoard(row, col, size, horizontal, shipId);
-        this.updateShipMap(shipId, size, row, col, horizontal);
-        placed = true;
-      } else {
-        triedCoordinates.add(coordinateKey);
-
-        if (triedCoordinates.size === maxRow * maxCol * 2) {
-          throw new Error("Failed to find a valid position for the ship");
-        }
-      }
-    }
-  }
-
-  private updateShipMap(
-    shipId: number,
-    size: number,
-    row: number,
-    col: number,
-    horizontal: boolean,
-  ) {
-    const positions: Array<number> = [];
-    for (let i = 0; i < size; i++) {
-      const position = horizontal
-        ? row * this.boardSize + (col + i)
-        : (row + i) * this.boardSize + col;
-      positions.push(position);
-    }
-    this.shipMap.set(shipId, { hits: 0, size, positions, horizontal });
-  }
-
-  private canPlaceShip(
-    row: number,
-    col: number,
-    size: number,
-    horizontal: boolean,
-  ): boolean {
-    for (let i = 0; i < size; i++) {
-      const r = row + (horizontal ? 0 : i);
-      const c = col + (horizontal ? i : 0);
-      if (
-        r >= this.boardSize ||
-        c >= this.boardSize ||
-        this._board[r * this.boardSize + c] !== 0
-      ) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  private placeShipOnBoard(
-    row: number,
-    col: number,
-    size: number,
-    horizontal: boolean,
-    shipId: number,
-  ) {
-    for (let i = 0; i < size; i++) {
-      const r = row + (horizontal ? 0 : i);
-      const c = col + (horizontal ? i : 0);
-      this._board[r * this.boardSize + c] = shipId;
-    }
-  }
-
-  public attack(index: number) {
     const shipId = this._board[index];
-    const ship = this.shipMap.get(shipId);
+    const ship = this._shipDetailsMap.get(shipId);
 
     if (!ship) {
       this._board[index] = -1;
-      return false;
+    } else {
+      this._board[index] = -2;
+      ship.hits++;
+      this.onShipHit(shipId);
+      if (ship.hits === ship.size) this.onShipSunk(shipId);
+      if (this.isAllShipsSunk()) this.onAllShipsSunk();
     }
 
-    ship.hits++;
-    this._board[index] = -2;
-    return true;
+    this.onBoardChange(this.board);
+  };
+
+  public isAllShipsSunk() {
+    return Array.from(this._shipDetailsMap.values()).every(
+      (ship) => ship.hits === ship.size,
+    );
   }
 
   public displayBoard() {
-    for (let row = 0; row < this.boardSize; row++) {
+    for (let row = 0; row < this._boardSize; row++) {
       let rowDisplay = "";
-      for (let col = 0; col < this.boardSize; col++) {
+      for (let col = 0; col < this._boardSize; col++) {
         rowDisplay +=
-          this._board[row * this.boardSize + col].toString().padStart(2, "0") +
+          this._board[row * this._boardSize + col].toString().padStart(2, "0") +
           " ";
       }
       console.log(rowDisplay, "row:", row);
     }
-    console.log(this.shipMap);
+  }
+
+  public displayShipMap() {
+    console.log(this._shipDetailsMap);
   }
 }

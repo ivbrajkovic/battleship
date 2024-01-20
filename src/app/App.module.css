@@ -1,0 +1,19 @@
+.container {
+  display: grid;
+  gap: var(--mantine-spacing-sm);
+  grid-template-columns: 1fr;
+
+  @mixin larger-than $mantine-breakpoint-md {
+    gap: var(--mantine-spacing-md);
+    grid-template-columns: auto 1fr;
+  }
+
+  @mixin larger-than $mantine-breakpoint-lg {
+    gap: var(--mantine-spacing-xl);
+  }
+
+  &:first-child {
+    justify-self: center;
+    align-self: center;
+  }
+}

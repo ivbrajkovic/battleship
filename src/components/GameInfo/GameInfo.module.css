@@ -1,0 +1,16 @@
+.paper {
+  align-self: center;
+  justify-self: center;
+  padding: var(--mantine-spacing-md);
+
+  @mixin larger-than $mantine-breakpoint-md {
+    padding: var(--mantine-spacing-lg);
+  }
+}
+
+.stack {
+  gap: var(--mantine-spacing-sm);
+  @mixin larger-than $mantine-breakpoint-md {
+    gap: var(--mantine-spacing-md);
+  }
+}

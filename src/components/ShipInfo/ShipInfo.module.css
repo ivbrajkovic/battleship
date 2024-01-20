@@ -1,0 +1,51 @@
+.container {
+  display: grid;
+  gap: rem(16);
+  grid-template-columns: rem(82) 1fr;
+
+  align-items: flex-end;
+
+  @mixin larger-than $mantine-breakpoint-sm {
+    grid-template-columns: rem(96) 1fr;
+  }
+
+  @mixin larger-than $mantine-breakpoint-md {
+    grid-template-columns: rem(128) 1fr;
+  }
+}
+
+.shipImage {
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+}
+
+.hitsContainer {
+  display: flex;
+  width: fit-content;
+
+  border-bottom: 1px solid var(--mantine-color-gray-6);
+  border-left: 1px solid var(--mantine-color-gray-6);
+
+  & > * {
+    border-right: 1px solid var(--mantine-color-gray-6);
+    border-top: 1px solid var(--mantine-color-gray-6);
+  }
+}
+
+.hit {
+  width: rem(18);
+  height: rem(18);
+
+  @mixin larger-than $mantine-breakpoint-md {
+    width: rem(24);
+    height: rem(24);
+  }
+}
+
+.icon {
+  width: 100%;
+  height: 100%;
+
+  color: var(--mantine-color-red-8);
+}

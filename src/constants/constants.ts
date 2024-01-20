@@ -1,12 +1,15 @@
-import miss from "../assets/miss.png";
-import hit from "../assets/hit.png";
+import carrier from "../assets/Carrier Shape.png";
+import battleship from "../assets/Battleship Shape.png";
+import cruiser from "../assets/Cruiser Shape.png";
+import submarine from "../assets/Submarine Shape.png";
+import destroyer from "../assets/Destroyer Shape.png";
 
 export const BOARD_SIZE = 5;
 
-export const tileValueToImageMap: {
-  [key: number]: string | undefined;
-} = {
-  0: undefined,
-  [-1]: miss,
-  [-2]: hit,
+export const shipImages = {
+  carrier,
+  battleship,
+  cruiser,
+  submarine,
+  destroyer,
 };

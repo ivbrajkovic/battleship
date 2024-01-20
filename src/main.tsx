@@ -1,15 +1,17 @@
+import { StrictMode } from "react";
 import "@mantine/core/styles.css";
 
-import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.tsx";
-
-import { MantineProvider } from "@mantine/core";
+import App from "./app/App.tsx";
+import { MantineProvider } from "./providers/MantineProvider.tsx";
+import { GameProvider } from "./providers/GameProvider.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
+  <StrictMode>
     <MantineProvider>
-      <App />
+      <GameProvider>
+        <App />
+      </GameProvider>
     </MantineProvider>
-  </React.StrictMode>,
+  </StrictMode>,
 );
