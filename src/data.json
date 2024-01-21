@@ -1,4 +1,5 @@
 {
+  "boardSize": 10,
   "shipTypes": {
     "carrier": { "size": 5, "count": 1 },
     "battleship": { "size": 4, "count": 1 },

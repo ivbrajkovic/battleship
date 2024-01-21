@@ -7,11 +7,12 @@ import {
   TooltipProps,
   useMantineColorScheme,
 } from "@mantine/core";
-import { IconRefresh } from "@tabler/icons-react";
+import { IconRefresh, IconTool } from "@tabler/icons-react";
 
 import { IconColorScheme } from "../components/IconColorScheme/IconColorScheme";
 import { useBattleshipGame } from "../hooks/useBattleshipGame";
 import { useIsMobile } from "../hooks/useIsMobile";
+import { openGameSettingsModal } from "../utility/modals";
 
 type NavbarTooltipProps = TooltipProps & {
   children: ReactNode;
@@ -71,6 +72,11 @@ export const Navbar = (props: NavbarProps) => {
       <NavbarTooltip label="Toggle color scheme">
         <ActionIcon size="xl" radius="md" onClick={toggleColorScheme}>
           <IconColorScheme />
+        </ActionIcon>
+      </NavbarTooltip>
+      <NavbarTooltip label="Game settings">
+        <ActionIcon size="xl" radius="md" onClick={openGameSettingsModal}>
+          <IconTool />
         </ActionIcon>
       </NavbarTooltip>
     </Stack>

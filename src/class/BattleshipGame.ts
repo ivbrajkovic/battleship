@@ -3,7 +3,7 @@ type ShipType = {
   count: number;
 };
 
-type ShipTypes = {
+export type ShipTypes = {
   [key: string]: ShipType;
 };
 
@@ -170,7 +170,7 @@ export class BattleshipGame {
    * altering the original board data within the BattleshipGame instance.
    */
   get board(): number[] {
-    return this._board.slice();
+    return structuredClone(this._board);
   }
 
   /**
@@ -185,9 +185,15 @@ export class BattleshipGame {
    * This getter method is designed to prevent external mutation of the ship details,
    */
   get shipDetails() {
-    return Array.from(this._shipDetailsMap.values()).map((ship) => ({
-      ...ship,
-    }));
+    return structuredClone(Array.from(this._shipDetailsMap.values()));
+  }
+
+  /**
+   * Retrieves a copy of the current ship types from the BattleshipGame instance.
+   * This getter method is designed to prevent external mutation of the ship types,
+   */
+  get shipTypes() {
+    return structuredClone(this._shipTypes);
   }
 
   // Public Methods -------------------------------------------------------------

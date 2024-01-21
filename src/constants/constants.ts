@@ -4,8 +4,6 @@ import cruiser from "../assets/Cruiser Shape.png";
 import submarine from "../assets/Submarine Shape.png";
 import destroyer from "../assets/Destroyer Shape.png";
 
-export const BOARD_SIZE = 5;
-
 export const shipImages = {
   carrier,
   battleship,
