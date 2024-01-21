@@ -5,6 +5,7 @@ import { useBattleshipGame } from "../../hooks/useBattleshipGame";
 import { ShipInfo } from "../ShipInfo/ShipInfo";
 
 import classes from "./GameInfo.module.css";
+import { openGameWonModal } from "../../utility/modals";
 
 export const GameInfo = () => {
   const battleshipGame = useBattleshipGame();
@@ -24,6 +25,7 @@ export const GameInfo = () => {
 
     battleshipGame.onShipDetailsChange = setShipDetails;
     battleshipGame.onShipHit = handleShipHit;
+    battleshipGame.onGameWon = openGameWonModal;
   }, [battleshipGame]);
 
   return (

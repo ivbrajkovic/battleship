@@ -1,8 +1,10 @@
 import { ModalsProvider as MantineModalsProvider } from "@mantine/modals";
 import { GameSettingsModal } from "../modals/GameSettingsModal";
+import { GameWonModal } from "../modals/GameWonModal";
 
 export const modals = {
   gameSettings: GameSettingsModal,
+  gameWon: GameWonModal,
 };
 
 declare module "@mantine/modals" {

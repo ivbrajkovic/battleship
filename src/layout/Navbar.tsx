@@ -59,6 +59,14 @@ export const Navbar = (props: NavbarProps) => {
             props.toggleNavbarOpen();
           }}
         />
+        <NavLink
+          label="Game settings"
+          leftSection={<IconTool />}
+          onClick={() => {
+            openGameSettingsModal();
+            props.toggleNavbarOpen();
+          }}
+        />
       </Stack>
     );
 

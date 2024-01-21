@@ -24,16 +24,16 @@ type BattleshipGameConfig = {
 export class BattleshipGame {
   private static _instance: BattleshipGame;
   private _shipIdCounter: number = 1;
-  private _boardSize: number;
+  private _boardSize: number = 10;
   private _board: number[];
-  private _shipTypes: ShipTypes;
+  private _shipTypes: ShipTypes = {};
   private _shipDetailsMap: Map<number, ShipDetails>;
+  private _attackCount: number = 0;
 
   onBoardChange: (board: number[]) => void = () => {};
   onShipDetailsChange: (shipDetails: ShipDetails[]) => void = () => {};
-  onShipSunk: (shipId: number) => void = () => {};
   onShipHit: (shipId: number) => void = () => {};
-  onAllShipsSunk: () => void = () => {};
+  onGameWon: () => void = () => {};
 
   public static getInstance() {
     if (!BattleshipGame._instance)
@@ -44,8 +44,6 @@ export class BattleshipGame {
   // Private Methods and Constructor (Singleton) --------------------------------
 
   private constructor() {
-    this._boardSize = 10;
-    this._shipTypes = {};
     this._board = Array(this._boardSize * this._boardSize).fill(0);
     this._shipDetailsMap = new Map();
     this.placeShips();
@@ -196,6 +194,10 @@ export class BattleshipGame {
     return structuredClone(this._shipTypes);
   }
 
+  get attackCount() {
+    return this._attackCount;
+  }
+
   // Public Methods -------------------------------------------------------------
 
   public init(config: Partial<BattleshipGameConfig> = {}) {
@@ -204,6 +206,7 @@ export class BattleshipGame {
     this._board = Array(this._boardSize * this._boardSize).fill(0);
     this._shipDetailsMap = new Map();
     this._shipIdCounter = 1;
+    this._attackCount = 0;
     this.placeShips();
   }
 
@@ -215,6 +218,8 @@ export class BattleshipGame {
 
   public attack = (index: number) => {
     if (index < 0 || index >= this._board.length) return;
+
+    this._attackCount++;
     if (this._board[index] === -1 || this._board[index] === -2) return;
 
     const shipId = this._board[index];
@@ -226,8 +231,7 @@ export class BattleshipGame {
       this._board[index] = -2;
       ship.hits++;
       this.onShipHit(shipId);
-      if (ship.hits === ship.size) this.onShipSunk(shipId);
-      if (this.isAllShipsSunk()) this.onAllShipsSunk();
+      if (this.isAllShipsSunk()) this.onGameWon();
     }
 
     this.onBoardChange(this.board);

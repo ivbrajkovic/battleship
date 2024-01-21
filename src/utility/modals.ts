@@ -6,3 +6,10 @@ export const openGameSettingsModal = () =>
     title: "Game Settings",
     innerProps: {},
   });
+
+export const openGameWonModal = () =>
+  openContextModal({
+    modal: "gameWon",
+    title: "Congratulations!",
+    innerProps: {},
+  });
